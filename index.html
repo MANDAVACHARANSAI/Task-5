@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TechStore</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .nav-btn {
+      padding: 0.5rem 1rem;
+      border-radius: 0.375rem;
+      color: #4B5563;
+      transition: all 0.3s;
+    }
+    .nav-btn:hover {
+      color: #2563EB;
+    }
+    .bg-blue-100 {
+      background-color: #DBEAFE;
+    }
+    .text-blue-700 {
+      color: #1D4ED8;
+    }
+  </style>
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="bg-gray-50">
+  <header class="bg-white shadow sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+      <div class="flex items-center space-x-2">
+        <i data-lucide="package" class="w-6 h-6 text-blue-600"></i>
+        <h1 class="text-2xl font-bold text-gray-900">TechStore</h1>
+      </div>
+      <nav class="space-x-6 hidden md:flex">
+        <button onclick="navigate('home')" class="nav-btn" id="tab-home">Home</button>
+        <button onclick="navigate('products')" class="nav-btn" id="tab-products">Products</button>
+        <button onclick="navigate('features')" class="nav-btn" id="tab-features">Features</button>
+        <button onclick="navigate('contact')" class="nav-btn" id="tab-contact">Contact</button>
+      </nav>
+      <div class="relative">
+        <button onclick="navigate('cart')">
+          <i data-lucide="shopping-cart" class="w-6 h-6"></i>
+          <span id="cart-count" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">0</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main id="main-content"></main>
+
+  <script>
+    let cart = [];
+
+    const products = [
+      { id: 1, name: "Gaming Laptop", price: 1599, image: "gaming laptop.jpg", description: "Powerful gaming laptop", category: "Laptop", rating: 4.9 },
+      { id: 2, name: "Smart Watch", price: 399, image: "smartwatch.jpg", description: "Stylish smartwatch", category: "Mobile", rating: 4.6 },
+      { id: 3, name: "Tablet Pro", price: 899, image: "tablet.jpg", description: "High-performance tablet", category: "Mobile", rating: 4.7 },
+      { id: 4, name: "Bluetooth Speaker", price: 149, image: "bluetooth.jpg", description: "Portable speaker", category: "Household Appliance", rating: 4.5 },
+      { id: 5, name: "Digital Camera", price: 499, image: "camera.jpg", description: "HD camera", category: "Household Appliance", rating: 4.3 },
+      { id: 6, name: "Office Laptop", price: 999, image: "office laptop.jpg", description: "Efficient laptop", category: "Laptop", rating: 4.4 },
+      { id: 7, name: "Budget Smartphone", price: 299, image: "phone.jpg", description: "Affordable smartphone", category: "Mobile", rating: 4.2 },
+      { id: 8, name: "Smart TV 50\"", price: 799, image: "TV.jpg", description: "4K Smart TV", category: "TV", rating: 4.6 },
+      { id: 9, name: "household appliances", price: 899, image: "household.jpg", description: "cooking", category: "household appliances", rating: 4.6 }
+    ];
+
+    function navigate(tab) {
+      document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('bg-blue-100', 'text-blue-700'));
+      document.getElementById(`tab-${tab}`)?.classList.add('bg-blue-100', 'text-blue-700');
+
+      switch (tab) {
+        case 'home': renderHome(); break;
+        case 'products': renderProducts(); break;
+        case 'features': renderFeatures(); break;
+        case 'contact': renderContact(); break;
+        case 'cart': renderCart(); break;
+        case 'success': renderSuccess(); break;
+      }
+    }
+
+    function renderHome() {
+      document.getElementById('main-content').innerHTML = `
+        <section class="bg-gradient-to-r from-pink-400 to-purple-500 text-white text-center py-20">
+          <h2 class="text-4xl font-bold mb-4">Premium Electronics & Gadgets</h2>
+          <p class="text-lg">Discover the latest technology with unbeatable prices and fast shipping</p>
+          <button onclick="navigate('products')" class="mt-6 px-6 py-2 bg-white text-pink-600 rounded shadow">Shop Now</button>
+        </section>
+      `;
+      lucide.createIcons();
+    }
+
+    function renderProducts() {
+      const html = products.map(p => `
+        <div class="bg-white rounded-lg shadow p-4 text-center">
+          <img src="${p.image}" alt="${p.name}" class="mx-auto h-24 w-24 object-contain" />
+          <h3 class="text-lg font-semibold mt-4">${p.name}</h3>
+          <p class="text-gray-600">${p.description}</p>
+          <p class="text-red-500 font-bold mt-1">$${p.price}</p>
+          <button onclick='addToCart(${p.id})' class="mt-4 bg-teal-500 text-gray-800 font-semibold py-2 px-4 rounded hover:bg-teal-600">Add to Cart</button>
+
+        </div>
+      `).join('');
+
+      document.getElementById('main-content').innerHTML = `
+        <section class="py-12 max-w-7xl mx-auto px-6">
+          <h2 class="text-3xl font-bold mb-8 text-center">Featured Products</h2>
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            ${html}
+          </div>
+        </section>
+      `;
+      lucide.createIcons();
+    }
+
+    function addToCart(id) {
+      const product = products.find(p => p.id === id);
+      const existing = cart.find(item => item.id === id);
+      if (existing) existing.quantity++;
+      else cart.push({ ...product, quantity: 1 });
+      updateCartIcon();
+      alert("Added to cart");
+    }
+
+    function updateCartIcon() {
+      const total = cart.reduce((sum, item) => sum + item.quantity, 0);
+      document.getElementById('cart-count').textContent = total;
+    }
+
+    function renderCart() {
+      if (cart.length === 0) {
+        document.getElementById('main-content').innerHTML = `
+          <section class="text-center py-20">
+            <i data-lucide="shopping-cart" class="mx-auto w-12 h-12 text-gray-400"></i>
+            <p class="text-gray-600 mt-4">Your cart is empty</p>
+          </section>
+        `;
+        lucide.createIcons();
+        return;
+      }
+
+      const items = cart.map(item => `
+        <div class="flex justify-between items-center border-b py-4">
+          <div>
+            <h3 class="font-semibold">${item.name}</h3>
+            <p>$${item.price} x ${item.quantity}</p>
+          </div>
+          <div>$${item.price * item.quantity}</div>
+        </div>
+      `).join('');
+
+      document.getElementById('main-content').innerHTML = `
+        <section class="py-12 max-w-xl mx-auto">
+          <h2 class="text-2xl font-bold mb-6">Your Cart</h2>
+          ${items}
+          <div class="mt-6 text-right font-bold">Total: $${cart.reduce((t, i) => t + i.price * i.quantity, 0)}</div>
+
+          <div class="mt-10">
+            <h3 class="text-xl font-semibold mb-4">Payment Details</h3>
+            <form onsubmit="event.preventDefault(); navigate('success');" class="space-y-4 bg-white p-6 rounded shadow">
+              <input type="text" placeholder="Cardholder Name" class="w-full p-3 border rounded" required />
+              <input type="text" placeholder="Card Number" maxlength="16" class="w-full p-3 border rounded" required />
+              <div class="flex space-x-4">
+                <input type="text" placeholder="MM/YY" maxlength="5" class="w-1/2 p-3 border rounded" required />
+                <input type="text" placeholder="CVV" maxlength="3" class="w-1/2 p-3 border rounded" required />
+              </div>
+              <button type="submit" class="bg-blue-600 text-white px-6 py-3 rounded hover:bg-blue-700 w-full">Pay Now</button>
+            </form>
+          </div>
+        </section>
+      `;
+
+      lucide.createIcons();
+    }
+
+    function renderFeatures() {
+      document.getElementById('main-content').innerHTML = `
+        <section class="py-20 text-center">
+          <h2 class="text-3xl font-bold mb-4">Why Choose TechStore?</h2>
+          <p class="text-gray-600">Fast checkout, quality products, and 24/7 support</p>
+        </section>
+      `;
+      lucide.createIcons();
+    }
+
+    function renderContact() {
+      document.getElementById('main-content').innerHTML = `
+        <section class="py-12 max-w-2xl mx-auto">
+          <h2 class="text-3xl font-bold mb-6">Contact Us</h2>
+          <form class="space-y-4">
+            <input type="text" placeholder="Your Name" class="w-full p-3 border rounded" />
+            <input type="email" placeholder="Your Email" class="w-full p-3 border rounded" />
+            <textarea placeholder="Your Message" rows="5" class="w-full p-3 border rounded"></textarea>
+            <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded">Send Message</button>
+          </form>
+        </section>
+      `;
+      lucide.createIcons();
+    }
+
+    function renderSuccess() {
+      document.getElementById('main-content').innerHTML = `
+        <section class="text-center py-20">
+          <h2 class="text-4xl font-bold text-green-600">Payment Successful</h2>
+          <p class="text-gray-700 mt-4">Thank you for your purchase! Your order has been placed successfully.</p>
+        </section>
+      `;
+    }
+
+    navigate('home');
+    lucide.createIcons();
+  </script>
+
+  <div id="toast-container" class="fixed bottom-5 right-5 space-y-2 z-50"></div>
+</body>
+</html>
